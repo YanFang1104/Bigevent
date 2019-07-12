@@ -87,7 +87,7 @@
                             location.href = './index.html';
                         } else {
                             // alert('用户名或密码错误登录失败');
-                            $('.modal-body').text('用户名或密码错误登录失败');
+                            $('.modal-body').text(res.msg);
                             $('#myModal').modal({
                                 // 键盘上的 esc 键被按下时关闭模态框
                                 keyboard: true
