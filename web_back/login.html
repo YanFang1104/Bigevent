@@ -29,7 +29,47 @@
             </form>
         </div>
 
-    </div> 
+    </div>
+
+    <script src='./js/jquery-1.12.4.min.js'></script>
+
+    <script>
+        $(function () {
+            // 给登录框加点击事件
+            $('.input_sub').on('click', function (e) {
+                // 阻止表单元素submit的默认跳转
+                e.preventDefault();
+                // 获取用户输入的信息
+                var username = $('.input_txt').val();
+                var password = $('.input_pass').val();
+                // 判断用户输入的是否为空
+                if (username == '' || password == '') {
+                    alert('用户名或密码不能为空');
+                    // 退出程序
+                    return;
+                }
+                // 发送请求
+                $.post({
+                    url: 'http://localhost:8000/admin/login',
+                    data: { user_name: username, password: password },
+                    success: function (res) {
+                        if (res.code == 200) {
+                            location.href = './index.html';
+                        } else {
+                            alert('用户名或密码错误登录失败');
+                        }
+
+                    }
+                });
+
+
+            });
+        });
+
+
+
+
+    </script>
 
 </body>
 
