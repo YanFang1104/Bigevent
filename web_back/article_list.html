@@ -205,7 +205,7 @@
         </div>
     </div>
 
-   
+
 
     <!-- 导入模板 -->
     <script src='./js/template-web.js'></script>
@@ -262,6 +262,28 @@
                 }
             });
 
+            // 声明一个变量保存页码数
+            var mytotalPages = 10;
+            // 把ul用变量保存
+            var $pagination = $('.pagination');
+            var defaultOpts = {
+                totalPages: mytotalPages,//最大页码
+                visiblePages: 5,//可见页码
+                first: '首页',
+                last: '尾页',
+                prev: '上一页',
+                next: '下一页',
+
+                onPageClick: function (event, page) {
+                    console.log(event);
+                    console.log(page);
+                    getData(page);
+                }
+            }
+            // 调用方法生成页码
+            $pagination.twbsPagination(defaultOpts);
+
+
             // 发送请求查询对应页码的文章显示在页面上
             function getData(page) {
                 // 获取用户选择的分类和状态
@@ -281,6 +303,25 @@
                         if (res.code == 200) {
                             var html = template('tmp-art', res);
                             $('tbody').html(html);
+
+                            // 因为总页码在发送请求成功返回的数据中
+                            // 所以重绘页码条的代码写在这里
+
+                            // 获取总页数
+                            var totalPages = res.totalPage;
+                            // 判断新的总页数是否和之前的总页数相同
+                            if (mytotalPages != totalPages) {
+                                // 把新的总页数赋值给声明的总页数
+                                mytotalPages = totalPages;
+                                // 获取当前页
+                                var currentPage = $pagination.twbsPagination('getCurrentPage');
+                                // 调用插件的方法重绘页码条
+                                $pagination.twbsPagination('destroy');
+                                $pagination.twbsPagination($.extend({}, defaultOpts, {
+                                    startPage: 1,
+                                    totalPages: totalPages
+                                }));
+                            }
                         }
                     }
 
@@ -295,25 +336,9 @@
 
             });
 
+
             // 一进入页面就显示所有文章
             $('#btnSearch').trigger('click');
-
-
-            // 分页插件
-            $('.pagination').twbsPagination({
-                totalPages: 25,//最大页码
-                visiblePages: 5,//可见页码
-                first: '首页',
-                last: '尾页',
-                prev: '上一页',
-                next: '下一页',
-
-                onPageClick: function (event, page) {
-                    console.log(event);
-                    console.log(page);
-                    getData(page);
-                }
-            });
 
         });
 
