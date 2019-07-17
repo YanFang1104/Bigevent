@@ -27,20 +27,21 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="email" class="form-control article_form  title" id="inputEmail3 " value="文章标题文字">
+                        <input type="email" class="form-control article_form  title" name='title' id="inputEmail3 "
+                            value="文章标题文字">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
-                        <img src="images/pic06.jpg" class="article_cover">
-                        <input type="file" id="exampleInputFile">
+                        <img src="images/pic06.jpg" class="article_cover art-img ">
+                        <input type="file" name='cover' id="exampleInputFile">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label article_type">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control type">
+                        <select class="form-control type art-cate" name='type'>
                             <option>类别一</option>
                             <option>类别二</option>
                             <option>类别三</option>
@@ -54,7 +55,7 @@
                     <div class="col-sm-4">
 
                         <div class="input-group">
-                            <input type="text" class="form-control" value="2019-05-17" id="dateinput">
+                            <input type="text" class="form-control" name='date' value="2019-05-17" id="dateinput">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
                                     onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
@@ -66,22 +67,51 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" id="rich_content" name="content" placeholder="文章内容"
-                            value="文章内容">
+                        <input type="text" class="form-control" id="rich_content" placeholder="文章内容" value="文章内容">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success">修改</button>
+                        <button type="submit" class="btn btn-success btn-edit">修改</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- 导入模板文件 -->
+    <script src='./js/template-web.js'></script>
+    <!-- 准备模板 -->
+    <script type='text/html' id='art-tmp'>
+        {{each data}}
+        <option value='{{$value.id}}' >{{$value.name}}</option>
+        {{/each}}
+
+    </script>
+
     <script>
 
         $(function () {
+
+            // 需求：获取所有文章类别数据
+            $.get({
+                url: 'http://localhost:8000/admin/category_search',
+                success: function (res) {
+                    console.log(res);
+                    if (res.code == 200) {
+                        var html = template('art-tmp', res);
+                        $('.art-cate').html(html);
+                    }
+                }
+            })
+
+            // 图片预览
+            $('#exampleInputFile').on('change', function () {
+                var url = URL.createObjectURL(this.files[0]);
+               $(this).prev().attr('src', url);
+            })
+
+
             //需求：  获取id
             // location.search可以获取网址？后面的内容（已经id拼接在网址后面）
             // 传过来的是字符串 用split切割字符串 
@@ -112,7 +142,30 @@
             });
 
 
-        })
+            //需求:给修改按钮设置点击事件,完成修改
+            $('.btn-edit').on('click', function (e) {
+                e.preventDefault();//阻止默认跳转
+                var formData1 = new FormData($('form')[0]);
+                //往formData1追加id和富文本中修改后的内容
+                formData1.append('id', id);
+                formData1.append('content', tinyMCE.activeEditor.getContent());
+                //发送ajax请求.
+                $.ajax({
+                    type: 'post',
+                    url: 'http://localhost:8000/admin/article_edit',
+                    data: formData1,
+                    contentType: false,
+                    processData: false,
+                    success: function (backData) {
+                        if (backData.code == 200) {
+                            alert('修改成功!');
+                        }
+                    }
+                });
+            });
+
+
+        });
 
 
 
