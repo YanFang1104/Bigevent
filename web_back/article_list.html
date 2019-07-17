@@ -231,7 +231,7 @@
 
         <td class="text-center">
             <a href="post-edit.html" class="btn btn-default btn-xs">编辑</a>
-            <a href="#" data-id={{$value.id}} class="btn btn-danger btn-xs">删除</a>
+            <a href="#" data-id={{$value.id}} class="btn btn-danger btn-xs btn-delect">删除</a>
         </td>
     </tr>
 
@@ -249,6 +249,7 @@
         })
 
         $(function () {
+
             // 一进到页面就获取所有的文章类别 
             $.get({
                 url: 'http://localhost:8000/admin/category_search ',
@@ -309,12 +310,15 @@
 
                             // 获取总页数
                             var totalPages = res.totalPage;
+
+                            // 获取当前页 把当前页暴露给window
+                      
+                             window.currentPage = $pagination.twbsPagination('getCurrentPage');
+
                             // 判断新的总页数是否和之前的总页数相同
                             if (mytotalPages != totalPages) {
-                                // 把新的总页数赋值给声明的总页数
-                                mytotalPages = totalPages;
-                                // 获取当前页
-                                var currentPage = $pagination.twbsPagination('getCurrentPage');
+                                // 如果不同就把新的总页数赋值给要重绘的总页数
+                                mytotalPages = totalPages
                                 // 调用插件的方法重绘页码条
                                 $pagination.twbsPagination('destroy');
                                 $pagination.twbsPagination($.extend({}, defaultOpts, {
@@ -340,7 +344,30 @@
             // 一进入页面就显示所有文章
             $('#btnSearch').trigger('click');
 
+            // 给删除按钮加点击事件
+            $('tbody').on('click', '.btn-delect', function () {
+                // 保存下this
+                var that = $(this);
+                if (confirm('是否确认要删除?')) {
+                    // 获取要删除的文章id
+                    var id = $(this).attr('data-id');
+                    // 发送请求
+                    $.get({
+                        url: 'http://localhost:8000/admin/article_delete',
+                        data: { id: id },
+                        success: function (res) {
+                            if (res.code == 200) {
+                                getData(currentPage);
+                            }
+                        }
+                    });
+                }
+
+            })
+
         });
+
+
 
 
 
